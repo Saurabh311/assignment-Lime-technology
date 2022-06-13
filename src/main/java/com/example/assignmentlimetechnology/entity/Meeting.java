@@ -4,30 +4,29 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
+import java.math.BigInteger;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
 @Table (name = "meetings")
 public class Meeting {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private String id;
 
     @Column (nullable = false)
-    private LocalDate date;
+    private LocalDateTime meetingStartDateTime;
 
     @Column (nullable = false)
-    private LocalTime time;
+    private LocalDateTime meetingEndDateTime;
 
-    @ManyToOne(targetEntity = Employee.class,fetch = FetchType.LAZY)
-    @JoinColumn(name = "employee", nullable = false)
-    @JsonIgnore
-    private Employee customer;
-
-    @Column(name = "employee", insertable = false, updatable = false)
-    private Long employeeId;
+    @Column (nullable = false)
+    private BigInteger employeeId;
 }
