@@ -6,5 +6,5 @@ import java.math.BigInteger;
 import java.util.List;
 
 public interface MeetingRepository extends JpaRepository<Meeting, Long> {
-    List<Meeting> findMeetingByEmployeeId(BigInteger id);
+    List<Meeting> findMeetingByEmployeeId(String id);
 }
