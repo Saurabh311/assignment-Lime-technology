@@ -5,10 +5,9 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@Builder
 @Data
-public class CreateMeeting {
-    String employeeID;
-    LocalDateTime startDatetimeMeeting;
-    LocalDateTime endDateTimeMeeting;
+@Builder
+public class MeetingSlot {
+    LocalDateTime startDateTime;
+    LocalDateTime endDateTime;
 }

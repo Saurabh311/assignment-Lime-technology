@@ -1,38 +1,36 @@
 package com.example.assignmentlimetechnology.service;
 
-import com.example.assignmentlimetechnology.entity.Meeting;
 import com.example.assignmentlimetechnology.entity.MeetingRequest;
-import com.example.assignmentlimetechnology.repository.EmployeeRepository;
-import com.example.assignmentlimetechnology.repository.MeetingRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.example.assignmentlimetechnology.entity.MeetingSlot;
 import org.springframework.stereotype.Service;
-
-import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.List;
 
 
 @Service
 public class MeetingService {
-    @Autowired
-    private MeetingRepository meetingRepository;
 
-    @Autowired
-    EmployeeRepository employeeRepository;
+    public ArrayList<MeetingSlot> returnResult(MeetingRequest meetingRequest) throws Exception {
 
-    public Boolean meetingSlotAvailable(){
-        return true;
-    }
-    public List<Meeting> getAllMeeting() {
-        List<Meeting> meetings = new ArrayList<Meeting>();
-        meetingRepository.findAll().forEach(meeting -> meetings.add(meeting));
-        return meetings;
-    }
+        ArrayList<String> employeeID = new ArrayList<>();
+        employeeID.add(meetingRequest.getEmployeeIdList());
 
-    public void saveOrUpdate(Meeting meeting) {
-        meetingRepository.save(meeting);
+        DataDownloader dataDownloader = new DataDownloader();
+        LocalDateTime startMeetingDateTime = dataDownloader.dateTimeFormat(meetingRequest.getStartMeetingDateTime());
+        LocalDateTime endMeetingDateTime = dataDownloader.dateTimeFormat(meetingRequest.getEndMeetingDateTime());
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH.mm");
+        LocalTime officeStartTime = LocalTime.parse(meetingRequest.getOfficeStartTime(), formatter);
+        LocalTime officeEndTime = LocalTime.parse(meetingRequest.getOfficeEndTime(), formatter);
+        return dataDownloader.displayAvailableSlots(
+                employeeID,
+                startMeetingDateTime,
+                endMeetingDateTime,
+                meetingRequest.getMeetingLength(),
+                officeStartTime,
+                officeEndTime
+        );
     }
 }
