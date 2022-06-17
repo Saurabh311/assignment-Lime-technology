@@ -1,5 +1,6 @@
 package com.example.assignmentlimetechnology;
 
+import com.example.assignmentlimetechnology.Exception.EmployeeNotFoundException;
 import com.example.assignmentlimetechnology.service.DataDownloader;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -67,6 +68,8 @@ public class AssignmentLimeTechnologyApplication {
 
         }catch (Exception e){
             System.out.println("Wrong Input format");
+            e.printStackTrace();
+        } catch (EmployeeNotFoundException e) {
             e.printStackTrace();
         }
 

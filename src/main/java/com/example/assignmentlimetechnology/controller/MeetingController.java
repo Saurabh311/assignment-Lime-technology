@@ -1,5 +1,6 @@
 package com.example.assignmentlimetechnology.controller;
 
+import com.example.assignmentlimetechnology.Exception.EmployeeNotFoundException;
 import com.example.assignmentlimetechnology.entity.MeetingRequest;
 import com.example.assignmentlimetechnology.entity.MeetingSlot;
 import com.example.assignmentlimetechnology.service.MeetingService;
@@ -20,7 +21,7 @@ public class MeetingController {
     private DataDownloader dataDownloader;
 
     @PostMapping(value = "/meetingEntry")
-    public ArrayList<MeetingSlot> newMeeting(@RequestBody MeetingRequest meetingRequest) throws Exception {
+    public ArrayList<MeetingSlot> newMeeting(@RequestBody MeetingRequest meetingRequest) throws Exception, EmployeeNotFoundException {
         ArrayList<MeetingSlot> meetingSlots = meetingService.returnResult(meetingRequest);
         return meetingSlots;
     }
@@ -35,5 +36,4 @@ public class MeetingController {
             e.printStackTrace();
         }
     }
-
 }

@@ -1,5 +1,6 @@
 package com.example.assignmentlimetechnology.service;
 
+import com.example.assignmentlimetechnology.Exception.EmployeeNotFoundException;
 import com.example.assignmentlimetechnology.entity.CreateMeeting;
 import com.example.assignmentlimetechnology.entity.MeetingSlot;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +34,7 @@ public class DataDownloader {
         bis.close();
     }
 
-    public ArrayList<CreateMeeting> readingData(String id) throws Exception {
+    public ArrayList<CreateMeeting> fetchEmployeeData(String id) throws Exception, EmployeeNotFoundException {
         File file = new File("src\\main\\resources\\bookedMeetingFile.txt");
         Scanner sc = new Scanner(file);
         ArrayList<CreateMeeting> meetings = new ArrayList<>();
@@ -53,31 +54,35 @@ public class DataDownloader {
                 }
             }
         }
-        return meetings;
+        if(meetings.size() > 0){
+            return meetings;
+        }
+
+        throw new EmployeeNotFoundException(id);
     }
 
-    public ArrayList<CreateMeeting> meetingsBtwTimeSlots(ArrayList<String> employeeIds, LocalDateTime earliestTime,
-                                                         LocalDateTime latestTime) throws Exception {
-        ArrayList<CreateMeeting> filterList = new ArrayList<>();
-        ArrayList<CreateMeeting> employeeData;
-        for(String employeeId: employeeIds){
-            employeeData = readingData(employeeId);
-            for (CreateMeeting meeting:employeeData) {
-                if((meeting.getStartDatetimeMeeting().equals(earliestTime)
-                        || meeting.getStartDatetimeMeeting().isAfter(earliestTime))
-                        && ((meeting.getEndDateTimeMeeting().equals(latestTime)
-                        || meeting.getEndDateTimeMeeting().isBefore(latestTime)))){
-                    filterList.add(meeting);
-                }
-                else if (meeting.getEndDateTimeMeeting().isAfter(earliestTime)){
-                    filterList.add(meeting);
+    public ArrayList<CreateMeeting> getBookedMeetingsBtwTimeSlots(ArrayList<String> employeeIds, LocalDateTime earliestTime,
+                                                         LocalDateTime latestTime) throws EmployeeNotFoundException, Exception {
+
+            ArrayList<CreateMeeting> filterList = new ArrayList<>();
+            ArrayList<CreateMeeting> employeeData;
+            for (String employeeId : employeeIds) {
+                employeeData = fetchEmployeeData(employeeId);
+                for (CreateMeeting meeting : employeeData) {
+                    if ((meeting.getStartDatetimeMeeting().equals(earliestTime)
+                            || meeting.getStartDatetimeMeeting().isAfter(earliestTime))
+                            && ((meeting.getEndDateTimeMeeting().equals(latestTime)
+                            || meeting.getEndDateTimeMeeting().isBefore(latestTime)))) {
+                        filterList.add(meeting);
+                    } else if (meeting.getEndDateTimeMeeting().isAfter(earliestTime)) {
+                        filterList.add(meeting);
+                    }
                 }
             }
+            return filterList;
         }
-        return filterList;
-    }
 
-    public ArrayList<MeetingSlot> findingSlots(ArrayList<CreateMeeting> meetingList, LocalDateTime earliestStartTime, LocalDateTime latestEndTime, Long meetingLength) {
+    public ArrayList<MeetingSlot> getMaxPossibleMeetingSlots(ArrayList<CreateMeeting> meetingList, LocalDateTime earliestStartTime, LocalDateTime latestEndTime, Long meetingLength) {
         LocalDateTime startTime = earliestStartTime;
         LocalDateTime endTime = startTime.plusMinutes(meetingLength);
         ArrayList<MeetingSlot> meetingSlots = new ArrayList<>();
@@ -91,8 +96,15 @@ public class DataDownloader {
             endTime = endTime.plusMinutes(meetingLength);
         }
         ArrayList<MeetingSlot> slotsToBeDeleted = new ArrayList<>();
-        for (MeetingSlot value : meetingSlots) {
-            for (CreateMeeting createMeeting : meetingList) {
+        int count = 0;
+        int meetingCount = 0;
+        System.out.println("meeting Slots");
+        System.out.println(meetingSlots);
+
+        for (int i = 0; i < meetingSlots.size(); i++) {
+            MeetingSlot value = meetingSlots.get(i);
+            for (int j = 0; j < meetingList.size(); j++) {
+                CreateMeeting createMeeting = meetingList.get(j);
                 if (value.getStartDateTime().isBefore(createMeeting.getStartDatetimeMeeting()) &&
                         value.getEndDateTime().isAfter(createMeeting.getStartDatetimeMeeting()) &&
                         value.getEndDateTime().isBefore(createMeeting.getEndDateTimeMeeting())) {
@@ -115,9 +127,18 @@ public class DataDownloader {
                 } else if (value.getStartDateTime().isEqual(createMeeting.getStartDatetimeMeeting())
                         && (value.getEndDateTime().isEqual(createMeeting.getEndDateTimeMeeting()))) {
                     slotsToBeDeleted.add(value);
+
+                } else if (value.getStartDateTime().isBefore(createMeeting.getStartDatetimeMeeting())
+                        && (value.getEndDateTime().isEqual(createMeeting.getEndDateTimeMeeting()))){
+                    slotsToBeDeleted.add(value);
                 }
+
+                meetingCount++;
             }
+            count++;
         }
+        System.out.println("count -" + count);
+        System.out.println("Meeting count -" + meetingCount);
         for (MeetingSlot value : slotsToBeDeleted) {
             for (int meetingSlot = 0; meetingSlot < meetingSlots.size(); meetingSlot++) {
                 if (value.equals(meetingSlots.get(meetingSlot))) {
@@ -125,17 +146,24 @@ public class DataDownloader {
                 }
             }
         }
+        System.out.println(meetingList);
+
+        System.out.println("slot to deleted");
+        System.out.println(slotsToBeDeleted);
+
         return meetingSlots;
     }
 
     public ArrayList<MeetingSlot> displayAvailableSlots(ArrayList<String> employeeId, LocalDateTime earliestStartTime,
                                       LocalDateTime latestEndTime, Long meetingLength,
-                                      LocalTime officeStartTime, LocalTime officeEndTime) throws Exception {
-        ArrayList<CreateMeeting> filterList = meetingsBtwTimeSlots(employeeId, earliestStartTime, latestEndTime);
-        ArrayList<MeetingSlot> meetingSlots = findingSlots(filterList, earliestStartTime, latestEndTime, meetingLength);
-        ArrayList<MeetingSlot> finalSlotsList = officeHourCal(meetingSlots, officeStartTime, officeEndTime);
+                                      LocalTime officeStartTime, LocalTime officeEndTime) throws Exception, EmployeeNotFoundException {
+        ArrayList<CreateMeeting> filterList = getBookedMeetingsBtwTimeSlots(employeeId, earliestStartTime, latestEndTime);
+        ArrayList<MeetingSlot> meetingSlots = getMaxPossibleMeetingSlots(filterList, earliestStartTime, latestEndTime, meetingLength);
+        ArrayList<MeetingSlot> finalSlotsList = officeHourFilter(meetingSlots, officeStartTime, officeEndTime);
         System.out.println(filterList);
+        System.out.println("Max Slots");
         System.out.println(meetingSlots);
+        System.out.println("Final Slots");
         System.out.println(finalSlotsList);
         if (finalSlotsList.size() > 0 ){
             System.out.println("Below time are available for Meeting" );
@@ -166,7 +194,7 @@ public class DataDownloader {
         return formattedDate;
     }
 
-    public ArrayList<MeetingSlot> officeHourCal(ArrayList<MeetingSlot> slotsList, LocalTime startTime, LocalTime endTime) {
+    public ArrayList<MeetingSlot> officeHourFilter(ArrayList<MeetingSlot> slotsList, LocalTime startTime, LocalTime endTime) {
         ArrayList<MeetingSlot> finalSlotsList = new ArrayList<>();
         LocalTime startOfficeHour;
         LocalTime endOfficeHour;

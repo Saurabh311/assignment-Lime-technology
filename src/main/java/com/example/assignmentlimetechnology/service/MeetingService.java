@@ -1,5 +1,6 @@
 package com.example.assignmentlimetechnology.service;
 
+import com.example.assignmentlimetechnology.Exception.EmployeeNotFoundException;
 import com.example.assignmentlimetechnology.entity.MeetingRequest;
 import com.example.assignmentlimetechnology.entity.MeetingSlot;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 @Service
 public class MeetingService {
 
-    public ArrayList<MeetingSlot> returnResult(MeetingRequest meetingRequest) throws Exception {
+    public ArrayList<MeetingSlot> returnResult(MeetingRequest meetingRequest) throws Exception, EmployeeNotFoundException {
 
         ArrayList<String> employeeID = new ArrayList<>();
         employeeID.add(meetingRequest.getEmployeeIdList());
