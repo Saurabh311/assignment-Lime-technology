@@ -82,7 +82,8 @@ public class DataDownloader {
             return filterList;
         }
 
-    public ArrayList<MeetingSlot> getMaxPossibleMeetingSlots(ArrayList<CreateMeeting> meetingList, LocalDateTime earliestStartTime, LocalDateTime latestEndTime, Long meetingLength) {
+    public ArrayList<MeetingSlot> getMaxPossibleMeetingSlots(ArrayList<CreateMeeting> meetingList, LocalDateTime earliestStartTime,
+                                                             LocalDateTime latestEndTime, Long meetingLength) {
         LocalDateTime startTime = earliestStartTime;
         LocalDateTime endTime = startTime.plusMinutes(meetingLength);
         ArrayList<MeetingSlot> meetingSlots = new ArrayList<>();
@@ -96,8 +97,6 @@ public class DataDownloader {
             endTime = endTime.plusMinutes(meetingLength);
         }
         ArrayList<MeetingSlot> slotsToBeDeleted = new ArrayList<>();
-        int count = 0;
-        int meetingCount = 0;
         System.out.println("meeting Slots");
         System.out.println(meetingSlots);
 
@@ -129,29 +128,31 @@ public class DataDownloader {
                     slotsToBeDeleted.add(value);
 
                 } else if (value.getStartDateTime().isBefore(createMeeting.getStartDatetimeMeeting())
-                        && (value.getEndDateTime().isEqual(createMeeting.getEndDateTimeMeeting()))){
+                        && (value.getEndDateTime().isEqual(createMeeting.getEndDateTimeMeeting()))) {
                     slotsToBeDeleted.add(value);
                 }
-
-                meetingCount++;
             }
-            count++;
-        }
-        System.out.println("count -" + count);
-        System.out.println("Meeting count -" + meetingCount);
-        for (MeetingSlot value : slotsToBeDeleted) {
-            for (int meetingSlot = 0; meetingSlot < meetingSlots.size(); meetingSlot++) {
-                if (value.equals(meetingSlots.get(meetingSlot))) {
-                    meetingSlots.remove(meetingSlots.get(meetingSlot));
+
+
+            }
+            //System.out.println("count -" + count);
+            //System.out.println("Meeting count -" + meetingCount);
+            for (MeetingSlot toDeletedSlot : slotsToBeDeleted) {
+                for (int meetingSlot = 0; meetingSlot < meetingSlots.size(); meetingSlot++) {
+                    if (toDeletedSlot.equals(meetingSlots.get(meetingSlot))) {
+                        meetingSlots.remove(meetingSlots.get(meetingSlot));
+                    }
                 }
-            }
+
         }
-        System.out.println(meetingList);
+            System.out.println("Max slots");
+            System.out.println(meetingList);
 
-        System.out.println("slot to deleted");
-        System.out.println(slotsToBeDeleted);
+            System.out.println("slot to deleted");
+            System.out.println(slotsToBeDeleted);
 
-        return meetingSlots;
+            return meetingSlots;
+
     }
 
     public ArrayList<MeetingSlot> displayAvailableSlots(ArrayList<String> employeeId, LocalDateTime earliestStartTime,
@@ -160,11 +161,8 @@ public class DataDownloader {
         ArrayList<CreateMeeting> filterList = getBookedMeetingsBtwTimeSlots(employeeId, earliestStartTime, latestEndTime);
         ArrayList<MeetingSlot> meetingSlots = getMaxPossibleMeetingSlots(filterList, earliestStartTime, latestEndTime, meetingLength);
         ArrayList<MeetingSlot> finalSlotsList = officeHourFilter(meetingSlots, officeStartTime, officeEndTime);
+        System.out.println("Meeting between time plus before");
         System.out.println(filterList);
-        System.out.println("Max Slots");
-        System.out.println(meetingSlots);
-        System.out.println("Final Slots");
-        System.out.println(finalSlotsList);
         if (finalSlotsList.size() > 0 ){
             System.out.println("Below time are available for Meeting" );
             for (MeetingSlot slot : finalSlotsList ) {
