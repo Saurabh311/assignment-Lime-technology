@@ -61,8 +61,8 @@ public class AssignmentLimeTechnologyApplication {
             String officeHoursEnd = input.nextLine();
             LocalTime officeEndTime = LocalTime.parse(officeHoursEnd, formatter);
 
-            LocalDateTime startMeetingDateTime = dataDownloader.dateTimeFormat(meetingStartTime);
-            LocalDateTime endMeetingDateTime = dataDownloader.dateTimeFormat(meetingEndTime);
+            LocalDateTime startMeetingDateTime = dataDownloader.localDateTimeFormatter(meetingStartTime);
+            LocalDateTime endMeetingDateTime = dataDownloader.localDateTimeFormatter(meetingEndTime);
             dataDownloader.displayAvailableSlots(employeeIds,startMeetingDateTime, endMeetingDateTime,
                     meetingLengthLong, officeStartTime, officeEndTime);
 

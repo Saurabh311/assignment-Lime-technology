@@ -4,10 +4,11 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 @Builder
 @Data
-public class CreateMeeting {
+public class Meeting {
     String employeeID;
     LocalDateTime startDatetimeMeeting;
     LocalDateTime endDateTimeMeeting;

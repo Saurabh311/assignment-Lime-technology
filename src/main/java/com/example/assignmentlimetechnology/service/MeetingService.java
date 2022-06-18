@@ -15,12 +15,12 @@ public class MeetingService {
 
     public ArrayList<MeetingSlot> returnResult(MeetingRequest meetingRequest) throws Exception, EmployeeNotFoundException {
 
-        ArrayList<String> employeeID = new ArrayList<>();
-        employeeID.add(meetingRequest.getEmployeeIdList());
+        ArrayList<String> employeeID = meetingRequest.getEmployeeIdList();
+        //employeeID.add(meetingRequest.getEmployeeIdList());
 
         DataDownloader dataDownloader = new DataDownloader();
-        LocalDateTime startMeetingDateTime = dataDownloader.dateTimeFormat(meetingRequest.getStartMeetingDateTime());
-        LocalDateTime endMeetingDateTime = dataDownloader.dateTimeFormat(meetingRequest.getEndMeetingDateTime());
+        LocalDateTime startMeetingDateTime = dataDownloader.localDateTimeFormatter(meetingRequest.getStartMeetingDateTime());
+        LocalDateTime endMeetingDateTime = dataDownloader.localDateTimeFormatter(meetingRequest.getEndMeetingDateTime());
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH.mm");
         LocalTime officeStartTime = LocalTime.parse(meetingRequest.getOfficeStartTime(), formatter);
