@@ -1,10 +1,9 @@
 package com.example.assignmentlimetechnology;
 
-import com.example.assignmentlimetechnology.Exception.EmployeeNotFoundException;
-import com.example.assignmentlimetechnology.service.DataDownloader;
+import com.example.assignmentlimetechnology.exception.EmployeeNotFoundException;
+import com.example.assignmentlimetechnology.service.DataService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -18,7 +17,7 @@ public class AssignmentLimeTechnologyApplication {
 
         SpringApplication.run(AssignmentLimeTechnologyApplication.class, args);
 
-        DataDownloader dataDownloader = new DataDownloader();
+        DataService dataDownloader = new DataService();
         String url = "https://builds.lundalogik.com/api/v1/builds/freebusy/versions/1.0.0/file";
         String fileLocation = "src\\main\\resources\\bookedMeetingFile.txt";
         try {
@@ -72,6 +71,5 @@ public class AssignmentLimeTechnologyApplication {
         } catch (EmployeeNotFoundException e) {
             e.printStackTrace();
         }
-
     }
 }

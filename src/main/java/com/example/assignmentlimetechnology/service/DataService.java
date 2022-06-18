@@ -1,9 +1,8 @@
 package com.example.assignmentlimetechnology.service;
 
-import com.example.assignmentlimetechnology.Exception.EmployeeNotFoundException;
+import com.example.assignmentlimetechnology.exception.EmployeeNotFoundException;
 import com.example.assignmentlimetechnology.entity.Meeting;
 import com.example.assignmentlimetechnology.entity.MeetingSlot;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -17,10 +16,9 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-@Slf4j
 @Service
-public class DataDownloader {
-
+public class DataService {
+    // function or fetching the latest booked meeting data from API and saving Local text file.
     public void downloadData(String apiUrl, String file) throws Exception {
         URL url = new URL(apiUrl);
         BufferedInputStream bis = new BufferedInputStream(url.openStream());
@@ -34,6 +32,7 @@ public class DataDownloader {
         bis.close();
     }
 
+    // fetching all detail of particular employee data from the saved meeting data.
     public ArrayList<Meeting> fetchEmployeeData(String id) throws Exception, EmployeeNotFoundException {
         File file = new File("src\\main\\resources\\bookedMeetingFile.txt");
         Scanner sc = new Scanner(file);
@@ -54,36 +53,55 @@ public class DataDownloader {
                 }
             }
         }
-        if(meetings.size() > 0){
-            return meetings;
-        }
-
-        throw new EmployeeNotFoundException(id);
-    }
-
-    public ArrayList<Meeting> getBookedMeetingsRelatedTimeSlots(ArrayList<String> employeeIds, LocalDateTime earliestTime,
-                                                                LocalDateTime latestTime) throws EmployeeNotFoundException, Exception {
-
-            ArrayList<Meeting> filterList = new ArrayList<>();
-            ArrayList<Meeting> employeeData;
-            for (String employeeId : employeeIds) {
-                employeeData = fetchEmployeeData(employeeId);
-                for (Meeting meeting : employeeData) {
-                    if ((meeting.getStartDatetimeMeeting().equals(earliestTime)
-                            || meeting.getStartDatetimeMeeting().isAfter(earliestTime))
-                            && ((meeting.getEndDateTimeMeeting().equals(latestTime)
-                            || meeting.getEndDateTimeMeeting().isBefore(latestTime)))) {
-                        filterList.add(meeting);
-                    } else if (meeting.getEndDateTimeMeeting().isAfter(earliestTime)) {
-                        filterList.add(meeting);
-                    }
+        // Add hardcode data as well for unit testing and scenario base functional testing
+        File testCaseData= new File("src\\main\\resources\\testCase.txt");
+        Scanner testCase = new Scanner(testCaseData);
+        String[] HardcodeDataLine;
+        while (testCase.hasNextLine()) {
+            HardcodeDataLine = testCase.nextLine().split(";");
+            if (HardcodeDataLine.length == 4 && HardcodeDataLine[0].equals(id)) {
+                LocalDateTime startMeetingDateTime = localDateTimeFormatter(HardcodeDataLine[1]);
+                LocalDateTime endMeetingDateTime = localDateTimeFormatter(HardcodeDataLine[2]);
+                if (startMeetingDateTime != null && endMeetingDateTime != null) {
+                    Meeting createMeeting = Meeting.builder()
+                            .employeeID(HardcodeDataLine[0])
+                            .startDatetimeMeeting(startMeetingDateTime)
+                            .endDateTimeMeeting(endMeetingDateTime)
+                            .build();
+                    meetings.add(createMeeting);
                 }
             }
-            return filterList;
         }
+        if (meetings.size() > 0) {
+            return meetings;
+        }
+        throw new EmployeeNotFoundException(id + " is not found.");
+    }
 
-    public ArrayList<MeetingSlot> getMaxPossibleMeetingSlots(ArrayList<Meeting> meetingList, LocalDateTime earliestStartTime,
-                                                             LocalDateTime latestEndTime, Long meetingLength) {
+    // Getting the booked meeting data of employees/employee between desired meeting date and times.
+    public ArrayList<Meeting> getBookedMeetingsBtwTimeSlots(ArrayList<String> employeeIds, LocalDateTime earliestTime,
+                                                            LocalDateTime latestTime) throws EmployeeNotFoundException, Exception {
+
+        ArrayList<Meeting> filterList = new ArrayList<>();
+        ArrayList<Meeting> employeeData;
+        for (String employeeId : employeeIds) {
+            employeeData = fetchEmployeeData(employeeId);
+            for (Meeting meeting : employeeData) {
+                if ((meeting.getStartDatetimeMeeting().equals(earliestTime)
+                        || meeting.getStartDatetimeMeeting().isAfter(earliestTime))
+                        && ((meeting.getEndDateTimeMeeting().equals(latestTime)
+                        || meeting.getEndDateTimeMeeting().isBefore(latestTime)))) {
+                    filterList.add(meeting);
+                }
+            }
+        }
+        return filterList;
+    }
+
+    // Getting maximum possible time slots as per given dates, times and desired length of meeting and
+    // deleting the meeting slots after comparing with already saved meeting date and times.
+    public ArrayList<MeetingSlot> getPossibleMeetingSlots(ArrayList<Meeting> meetingList, LocalDateTime earliestStartTime,
+                                                          LocalDateTime latestEndTime, Long meetingLength) {
         LocalDateTime startTime = earliestStartTime;
         LocalDateTime endTime = startTime.plusMinutes(meetingLength);
         ArrayList<MeetingSlot> meetingSlots = new ArrayList<>();
@@ -96,10 +114,8 @@ public class DataDownloader {
             startTime = endTime;
             endTime = endTime.plusMinutes(meetingLength);
         }
-        ArrayList<MeetingSlot> slotsToBeDeleted = new ArrayList<>();
-        System.out.println("meeting Slots");
-        System.out.println(meetingSlots);
 
+        ArrayList<MeetingSlot> slotsToBeDeleted = new ArrayList<>();
         for (int i = 0; i < meetingSlots.size(); i++) {
             MeetingSlot value = meetingSlots.get(i);
             for (int j = 0; j < meetingList.size(); j++) {
@@ -131,19 +147,23 @@ public class DataDownloader {
                         && (value.getEndDateTime().isEqual(createMeeting.getEndDateTimeMeeting()))) {
                     slotsToBeDeleted.add(value);
                 }
-            }
-            }
-            for (MeetingSlot toDeletedSlot : slotsToBeDeleted) {
-                for (int meetingSlot = 0; meetingSlot < meetingSlots.size(); meetingSlot++) {
-                    if (toDeletedSlot.equals(meetingSlots.get(meetingSlot))) {
-                        meetingSlots.remove(meetingSlots.get(meetingSlot));
-                    }
+                else if (value.getStartDateTime().isAfter(createMeeting.getStartDatetimeMeeting())
+                        && (value.getEndDateTime().isEqual(createMeeting.getEndDateTimeMeeting()))) {
+                    slotsToBeDeleted.add(value);
                 }
-
+            }
         }
-            return meetingSlots;
+        for (MeetingSlot toDeletedSlot : slotsToBeDeleted) {
+            for (int meetingSlot = 0; meetingSlot < meetingSlots.size(); meetingSlot++) {
+                if (toDeletedSlot.equals(meetingSlots.get(meetingSlot))) {
+                    meetingSlots.remove(meetingSlots.get(meetingSlot));
+                }
+            }
+        }
+        return meetingSlots;
     }
 
+    // Filtering the available time slots as per the office timing
     public ArrayList<MeetingSlot> officeHourFilter(ArrayList<MeetingSlot> slotsList, LocalTime startTime, LocalTime endTime) {
         ArrayList<MeetingSlot> finalSlotsList = new ArrayList<>();
         LocalTime startOfficeHour;
@@ -152,31 +172,34 @@ public class DataDownloader {
             startOfficeHour = meetingSlot.getStartDateTime().toLocalTime();
             endOfficeHour = meetingSlot.getEndDateTime().toLocalTime();
             if ((startOfficeHour.equals(startTime) || startOfficeHour.isAfter(startTime)) &&
-                    (endOfficeHour.equals(endTime) || endOfficeHour.isBefore(endTime) && endOfficeHour.isAfter(startOfficeHour))) {
+                    (endOfficeHour.equals(endTime) || endOfficeHour.isBefore(endTime) && endOfficeHour.isAfter(startOfficeHour))
+                    ) {
                 finalSlotsList.add(meetingSlot);
             }
         }
         return finalSlotsList;
     }
 
+    // Display the final list of available time slots
     public ArrayList<MeetingSlot> displayAvailableSlots(ArrayList<String> employeeId, LocalDateTime earliestStartTime,
-                                      LocalDateTime latestEndTime, Long meetingLength,
-                                      LocalTime officeStartTime, LocalTime officeEndTime) throws Exception, EmployeeNotFoundException {
-        ArrayList<Meeting> filterList = getBookedMeetingsRelatedTimeSlots(employeeId, earliestStartTime, latestEndTime);
-        ArrayList<MeetingSlot> meetingSlots = getMaxPossibleMeetingSlots(filterList, earliestStartTime, latestEndTime, meetingLength);
+                                                        LocalDateTime latestEndTime, Long meetingLength,
+                                                        LocalTime officeStartTime, LocalTime officeEndTime) throws Exception, EmployeeNotFoundException {
+        ArrayList<Meeting> filterList = getBookedMeetingsBtwTimeSlots(employeeId, earliestStartTime, latestEndTime);
+        ArrayList<MeetingSlot> meetingSlots = getPossibleMeetingSlots(filterList, earliestStartTime, latestEndTime, meetingLength);
         ArrayList<MeetingSlot> finalSlotsList = officeHourFilter(meetingSlots, officeStartTime, officeEndTime);
 
-        if (finalSlotsList.size() > 0 ){
-            System.out.println("Below time are available for Meeting" );
-            for (MeetingSlot slot : finalSlotsList ) {
-                System.out.println(slot.getStartDateTime() +" - "+slot.getEndDateTime());
+        if (finalSlotsList.size() > 0) {
+            System.out.println("Below time are available for Meeting");
+            for (MeetingSlot slot : finalSlotsList) {
+                System.out.println(slot.getStartDateTime() + " - " + slot.getEndDateTime());
             }
-        }else {
-            System.out.println("No slots available for Meeting" );
+        } else {
+            System.out.println("No slots available for Meeting");
         }
         return finalSlotsList;
     }
 
+    // function for formatting the API dates and time into desired Date and time format.
     public LocalDateTime localDateTimeFormatter(String dateTime) {
         DateFormat existingFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
         DateFormat desiredFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -187,7 +210,7 @@ public class DataDownloader {
             try {
                 date = existingFormat.parse(dateTime);
                 output = desiredFormat.format(date);
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss");
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                 formattedDate = LocalDateTime.parse(output, dtf);
             } catch (ParseException pe) {
                 pe.printStackTrace();
