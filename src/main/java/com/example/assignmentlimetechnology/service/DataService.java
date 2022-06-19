@@ -33,7 +33,7 @@ public class DataService {
     }
 
     // fetching all detail of particular employee data from the saved meeting data.
-    public ArrayList<Meeting> fetchEmployeeData(String id) throws Exception, EmployeeNotFoundException {
+    public ArrayList<Meeting> getEmployeeData(String id) throws Exception, EmployeeNotFoundException {
         File file = new File("src\\main\\resources\\bookedMeetingFile.txt");
         Scanner sc = new Scanner(file);
         ArrayList<Meeting> meetings = new ArrayList<>();
@@ -84,13 +84,13 @@ public class DataService {
 
         ArrayList<Meeting> filterList = new ArrayList<>();
         ArrayList<Meeting> employeeData;
-        for (String employeeId : employeeIds) {
-            employeeData = fetchEmployeeData(employeeId);
-            for (Meeting meeting : employeeData) {
-                if ((meeting.getStartDatetimeMeeting().equals(earliestTime)
+        for(String employeeId: employeeIds){
+            employeeData = getEmployeeData(employeeId);
+            for (Meeting meeting:employeeData) {
+                if((meeting.getStartDatetimeMeeting().equals(earliestTime)
                         || meeting.getStartDatetimeMeeting().isAfter(earliestTime))
                         && ((meeting.getEndDateTimeMeeting().equals(latestTime)
-                        || meeting.getEndDateTimeMeeting().isBefore(latestTime)))) {
+                        || meeting.getEndDateTimeMeeting().isBefore(latestTime)))){
                     filterList.add(meeting);
                 }
             }

@@ -25,7 +25,7 @@ class AssignmentLimeTechnologyApplicationTests {
 
     @Test
     public void test_fetch_employee_data() throws Exception, EmployeeNotFoundException {
-        ArrayList<Meeting> employeeData = dataDownloader.fetchEmployeeData("123");
+        ArrayList<Meeting> employeeData = dataDownloader.getEmployeeData("123");
         Assertions.assertNotNull(employeeData);
         assertEquals(7, employeeData.size());
     }
@@ -33,7 +33,7 @@ class AssignmentLimeTechnologyApplicationTests {
     @Test
     public void test_fetch_employee_data_with_wrong_id() throws Exception, EmployeeNotFoundException {
         Assertions.assertThrows(EmployeeNotFoundException.class, () -> {
-            ArrayList<Meeting> employeeData = dataDownloader.fetchEmployeeData("wrongID");
+            ArrayList<Meeting> employeeData = dataDownloader.getEmployeeData("wrongID");
         });
     }
 

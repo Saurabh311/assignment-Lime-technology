@@ -32,28 +32,29 @@ public class RunApp {
 
             System.out.println("Please enter desired meeting length (minutes)");
             String meetingLength = input.nextLine();
-
             Long meetingLengthLong = Long.parseLong(meetingLength);
+
             System.out.println("Please enter desired start time and date. Input format should " +
                     "be (uuuu-MM-dd HH:mm:ss) Ex.3/19/2015 10:00:00 AM");
-
             String meetingStartTime = input.nextLine();
+
             System.out.println("Please enter desired end time and date.Input format " +
                     "should be (uuuu-MM-dd HH:mm:ss) Ex.3/19/2015 14:00:00 PM");
-
             String meetingEndTime = input.nextLine();
+            LocalDateTime startMeetingDateTime = dataDownloader.localDateTimeFormatter(meetingStartTime);
+            LocalDateTime endMeetingDateTime = dataDownloader.localDateTimeFormatter(meetingEndTime);
+
             System.out.println("Please enter office (HH.mm) Ex: 08.00 ");
             String officeHoursStart = input.nextLine();
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH.mm");
-            LocalTime officeStartTime = LocalTime.parse(officeHoursStart, formatter);
 
             System.out.println("Please enter office (HH.mm) Ex: 17.00 ");
             String officeHoursEnd = input.nextLine();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH.mm");
+            LocalTime officeStartTime = LocalTime.parse(officeHoursStart, formatter);
             LocalTime officeEndTime = LocalTime.parse(officeHoursEnd, formatter);
 
-            LocalDateTime startMeetingDateTime = dataDownloader.localDateTimeFormatter(meetingStartTime);
-            LocalDateTime endMeetingDateTime = dataDownloader.localDateTimeFormatter(meetingEndTime);
+
             dataDownloader.displayAvailableSlots(employeeIds, startMeetingDateTime, endMeetingDateTime,
                     meetingLengthLong, officeStartTime, officeEndTime);
 
