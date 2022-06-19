@@ -31,7 +31,7 @@ class AssignmentLimeTechnologyApplicationTests {
     }
 
     @Test
-    public void test_fetch_employee_data_with_wrong_id() throws Exception, EmployeeNotFoundException {
+    public void test_fetch_employee_data_with_wrong_id() {
         Assertions.assertThrows(EmployeeNotFoundException.class, () -> {
             ArrayList<Meeting> employeeData = dataDownloader.getEmployeeData("wrongID");
         });
@@ -60,7 +60,7 @@ class AssignmentLimeTechnologyApplicationTests {
         String employeeIdList = "123";
         String startDateTime = "3/16/2015 8:00:00 AM";
         String endDateTime = "3/16/2015 8:00:00 PM";
-        Long meetingLength = Long.valueOf(60);
+        Long meetingLength = 60L;
         ArrayList<String> employeeID = new ArrayList<>();
         employeeID.add(employeeIdList);
         LocalDateTime startMeetingDateTime = dataDownloader.localDateTimeFormatter(startDateTime);
@@ -79,7 +79,7 @@ class AssignmentLimeTechnologyApplicationTests {
         String employeeIdList = "123";
         String startDateTime = "3/16/2015 8:00:00 AM";
         String endDateTime = "3/16/2015 8:00:00 PM";
-        Long meetingLength = Long.valueOf(60);
+        Long meetingLength = 60L;
         String officeTimeStart = "08.00";
         String officeTimeEnd = "17.00";
         ArrayList<String> employeeID = new ArrayList<>();
