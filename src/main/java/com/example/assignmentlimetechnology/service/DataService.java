@@ -189,12 +189,12 @@ public class DataService {
         ArrayList<MeetingSlot> finalSlotsList = officeHourFilter(meetingSlots, officeStartTime, officeEndTime);
 
         if (finalSlotsList.size() > 0) {
-            System.out.println("Below time are available for Meeting");
+            System.out.println("Below time slots are available for Meeting");
             for (MeetingSlot slot : finalSlotsList) {
                 System.out.println(slot.getStartDateTime() + " - " + slot.getEndDateTime());
             }
         } else {
-            System.out.println("No slots available for Meeting");
+            System.out.println("No time slots available for Meeting");
         }
         return finalSlotsList;
     }
