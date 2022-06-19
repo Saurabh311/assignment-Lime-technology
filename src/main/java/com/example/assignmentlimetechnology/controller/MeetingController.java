@@ -16,7 +16,7 @@ public class MeetingController {
     private MeetingService meetingService;
 
     @PostMapping(value = "/meetingEntry")
-    public ArrayList<MeetingSlot> newMeeting(@RequestBody MeetingRequest meetingRequest) throws Exception, EmployeeNotFoundException {
+    public ArrayList<MeetingSlot> newMeetingSuggestion(@RequestBody MeetingRequest meetingRequest) throws Exception, EmployeeNotFoundException {
         ArrayList<MeetingSlot> meetingSlots = meetingService.returnResult(meetingRequest);
         return meetingSlots;
     }    
